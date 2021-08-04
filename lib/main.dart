@@ -42,124 +42,137 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     String lens = isConvex ? "Convex" : "Concave";
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                width: 60,
-              ),
-              Column(
-                children: [
-                  Text(
-                    "Object Ray Diagram Of $lens Lens.",
-                    style: const TextStyle(fontSize: 40),
+      body: LayoutBuilder(builder: (context, boxConstraints) {
+        if ((boxConstraints.maxHeight <= 600 ||
+                boxConstraints.maxWidth <= 1400) &&
+            boxConstraints.maxHeight < boxConstraints.maxWidth) {
+          return const Center(
+            child: Text(
+              "Please use larger Dimention of the tab for better Experience.",
+              style: TextStyle(fontSize: 20),
+            ),
+          );
+        }
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  width: 60,
+                ),
+                Column(
+                  children: [
+                    Text(
+                      "Object Ray Diagram Of $lens Lens.",
+                      style: const TextStyle(fontSize: 40),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "u: Object Distance",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(
+                          width: 50,
+                        ),
+                        Text(
+                          "v: Image Distance",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(
+                          width: 50,
+                        ),
+                        Text(
+                          "f: Focal Length",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "u = ${value.toStringAsFixed(1)} units",
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(
+                          width: 50,
+                        ),
+                        isConvex
+                            ? Text(
+                                "f = $focalLength units",
+                                style: const TextStyle(fontSize: 18),
+                              )
+                            : Text(
+                                "f = -$focalLength units",
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                      ],
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    isConvex
+                        ? const Text("  Convex Lens")
+                        : const Text("Concave Lens"),
+                    Switch(
+                        value: !isConvex,
+                        onChanged: (value) {
+                          setState(() {
+                            isConvex = !value;
+                          });
+                        }),
+                  ],
+                )
+              ],
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(seconds: 1),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: animation,
+                  child: child,
+                );
+              },
+              switchInCurve: Curves.fastOutSlowIn,
+              child: SizedBox(
+                key: ValueKey(isConvex),
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height / 2,
+                child: CustomPaint(
+                  painter: OpticsPainter(
+                    objectDistance: value,
+                    focalLength: isConvex ? focalLength : -focalLength,
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        "u: Object Distance",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(
-                        width: 50,
-                      ),
-                      Text(
-                        "v: Image Distance",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(
-                        width: 50,
-                      ),
-                      Text(
-                        "f: Focal Length",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "u = ${value.toStringAsFixed(1)} units",
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                      const SizedBox(
-                        width: 50,
-                      ),
-                      isConvex
-                          ? Text(
-                              "f = $focalLength units",
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          : Text(
-                              "f = -$focalLength units",
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                    ],
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  isConvex
-                      ? const Text("  Convex Lens")
-                      : const Text("Concave Lens"),
-                  Switch(
-                      value: !isConvex,
-                      onChanged: (value) {
-                        setState(() {
-                          isConvex = !value;
-                        });
-                      }),
-                ],
-              )
-            ],
-          ),
-          AnimatedSwitcher(
-            duration: const Duration(seconds: 1),
-            transitionBuilder: (child, animation) {
-              return ScaleTransition(
-                scale: animation,
-                child: child,
-              );
-            },
-            switchInCurve: Curves.fastOutSlowIn,
-            child: SizedBox(
-              key: ValueKey(isConvex),
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height / 2,
-              child: CustomPaint(
-                painter: OpticsPainter(
-                  objectDistance: value,
-                  focalLength: isConvex ? focalLength : -focalLength,
                 ),
               ),
             ),
-          ),
-          Slider(
-              value: value,
-              max: objectMaximumDistance,
-              min: objectMinimumDistance,
-              onChanged: (v) {
-                setState(() {
-                  value = v;
-                });
-              }),
-        ],
-      ),
+            Slider(
+                value: value,
+                max: objectMaximumDistance,
+                min: objectMinimumDistance,
+                onChanged: (v) {
+                  setState(() {
+                    value = v;
+                  });
+                }),
+          ],
+        );
+      }),
     );
   }
 }
@@ -264,11 +277,12 @@ class OpticsPainter extends CustomPainter {
     //object naming
     const textStyleForObject = TextStyle(
       color: Colors.blue,
-      fontSize: 20,
+      fontSize: 12,
       fontWeight: FontWeight.bold,
     );
 
-    const textSpanForObject = TextSpan(text: "O", style: textStyleForObject);
+    const textSpanForObject =
+        TextSpan(text: "object", style: textStyleForObject);
 
     final textPainterForObject =
         TextPainter(text: textSpanForObject, textDirection: TextDirection.ltr);
@@ -300,15 +314,15 @@ class OpticsPainter extends CustomPainter {
     //image naming
     const textStyleForImage = TextStyle(
       color: Colors.green,
-      fontSize: 20,
+      fontSize: 12,
       fontWeight: FontWeight.bold,
     );
 
-    const textSpanForImage = TextSpan(text: "I", style: textStyleForImage);
+    const textSpanForImage = TextSpan(text: "image", style: textStyleForImage);
 
     final textPainterForImage =
         TextPainter(text: textSpanForImage, textDirection: TextDirection.ltr);
-    textPainterForImage.layout(minWidth: 0, maxWidth: 20);
+    textPainterForImage.layout(minWidth: 0, maxWidth: 200);
 
     if (focalLength < 0) {
       textPainterForImage.paint(
